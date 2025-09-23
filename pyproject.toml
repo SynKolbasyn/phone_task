@@ -1,0 +1,12 @@
+[project]
+name = "phone-task"
+version = "0.1.0"
+description = "test task"
+readme = "README.md"
+authors = [
+    { name = "Andrew Kozmin", email = "syn.kolbasyn.06@gmail.com" }
+]
+requires-python = ">=3.13, <3.14"
+dependencies = [
+    "fastapi[standard]==0.117.1",
+]
