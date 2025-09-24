@@ -1,0 +1,49 @@
+loki.write "loki" {
+  endpoint {
+    url = env("LOKI_URL")
+  }
+}
+
+local.file_match "nginx_access" {
+  path_targets = [
+    {__path__ = "/var/log/nginx/access.log", job = "nginx", type = "access"},
+  ]
+}
+
+local.file_match "nginx_error" {
+  path_targets = [
+    {__path__ = "/var/log/nginx/error.log", job = "nginx", type = "error"},
+  ]
+}
+
+local.file_match "fastapi_access" {
+  path_targets = [
+    {__path__ = "/var/log/fastapi/access.log", job = "fastapi", type = "access"},
+  ]
+}
+
+local.file_match "fastapi_error" {
+  path_targets = [
+    {__path__ = "/var/log/fastapi/error.log", job = "fastapi", type = "error"},
+  ]
+}
+
+loki.source.file "nginx_access_source" {
+  targets    = local.file_match.nginx_access.targets
+  forward_to = [loki.write.loki.receiver]
+}
+
+loki.source.file "nginx_error_source" {
+  targets    = local.file_match.nginx_error.targets
+  forward_to = [loki.write.loki.receiver]
+}
+
+loki.source.file "fastapi_access_source" {
+  targets    = local.file_match.fastapi_access.targets
+  forward_to = [loki.write.loki.receiver]
+}
+
+loki.source.file "fastapi_error_source" {
+  targets    = local.file_match.fastapi_error.targets
+  forward_to = [loki.write.loki.receiver]
+}

@@ -6,7 +6,21 @@ readme = "README.md"
 authors = [
     { name = "Andrew Kozmin", email = "syn.kolbasyn.06@gmail.com" }
 ]
+license = "AGPL-3.0-or-later"
 requires-python = ">=3.13, <3.14"
 dependencies = [
     "fastapi[standard]==0.117.1",
 ]
+
+[dependency-groups]
+dev = [
+    "ruff==0.13.1",
+]
+
+[tool.uv]
+default-groups = []
+
+[tool.ruff]
+src = ["./src/"]
+lint.select = ["ALL"]
+lint.ignore = ["D10", "D203", "D212"]

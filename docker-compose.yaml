@@ -1,0 +1,113 @@
+services:
+  redis:
+    hostname: "$REDIS_HOST"
+    image: "redis:latest"
+    command: "redis-server --requirepass $REDIS_PASSWORD"
+    env_file:
+      - "./.env"
+    expose:
+      - "$REDIS_PORT"
+    volumes:
+      - "./data/redis_data/:/data/"
+    restart: "unless-stopped"
+
+  postgres:
+    hostname: "$POSTGRES_HOST"
+    image: "postgres:latest"
+    expose:
+      - "$POSTGRES_PORT"
+    volumes:
+      - "./data/postgres_data/:/var/lib/postgresql/data/"
+    env_file:
+      - "./.env"
+    shm_size: "1gb"
+    restart: "unless-stopped"
+  
+  minio:
+    hostname: "$MINIO_HOST"
+    build:
+      context: "./minio/"
+      dockerfile: "./Dockerfile"
+    expose:
+      - "$MINIO_PORT"
+    volumes:
+      - "./data/minio_data/:/data/"
+    env_file:
+      - "./.env"
+    restart: "unless-stopped"
+
+  fastapi:
+    hostname: "$FASTAPI_HOST"
+    build:
+      context: "./"
+      dockerfile: "./Dockerfile"
+    expose:
+      - "$FASTAPI_PORT"
+    volumes:
+      - ./logs/fastapi/:/var/log/fastapi/
+    env_file:
+      - "./.env"
+    depends_on:
+      - "redis"
+      - "minio"
+      - "postgres"
+    restart: "unless-stopped"
+
+  nginx:
+    build:
+      context: "./nginx/"
+      dockerfile: "./Dockerfile"
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./logs/nginx/:/var/log/nginx/
+    env_file:
+      - "./.env"
+    depends_on:
+      - "fastapi"
+      - "grafana"
+    restart: "unless-stopped"
+  
+  alloy:
+    image: grafana/alloy:latest
+    depends_on:
+      - "nginx"
+      - "fastapi"
+      - "loki"
+    volumes:
+      - "./alloy/config.alloy:/etc/alloy/config.alloy:ro"
+      - "./logs/nginx/:/var/log/nginx/"
+      - "./logs/fastapi/:/var/log/fastapi/"
+    environment:
+      - LOKI_URL=http://$LOKI_HOST:$LOKI_PORT/loki/api/v1/push
+    command: "run /etc/alloy/config.alloy"
+    restart: "unless-stopped"
+  
+  loki:
+    hostname: "$LOKI_HOST"
+    image: grafana/loki:latest
+    expose:
+      - "$LOKI_PORT"
+    command: -config.file=/etc/loki/local-config.yaml
+    restart: "unless-stopped"
+
+  grafana:
+    hostname: "$GRAFANA_HOST"
+    image: grafana/grafana:latest
+    expose:
+      - "$GRAFANA_PORT"
+    env_file:
+      - "./.env"
+    environment:
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+      - GF_DASHBOARDS_DEFAULT_HOME_DASHBOARD_PATH=/var/lib/grafana/dashboards/loki-overview.json
+      - GF_PATHS_PROVISIONING=/etc/grafana/provisioning
+    depends_on:
+      - "loki"
+    volumes:
+      - ./grafana/provisioning/datasources/:/etc/grafana/provisioning/datasources/:ro
+      - ./grafana/provisioning/dashboards/:/etc/grafana/provisioning/dashboards/:ro
+      - ./grafana/dashboards/:/var/lib/grafana/dashboards/:ro
+    restart: "unless-stopped"

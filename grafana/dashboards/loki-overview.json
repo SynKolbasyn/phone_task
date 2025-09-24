@@ -1,0 +1,48 @@
+{
+  "id": null,
+  "uid": "loki-overview",
+  "title": "Loki Logs Overview",
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "10s",
+  "panels": [
+    {
+      "type": "timeseries",
+      "title": "Log lines per 5s (nginx)",
+      "gridPos": {"x": 0, "y": 0, "w": 12, "h": 8},
+      "targets": [
+        {
+          "datasource": {"type": "loki", "uid": "loki"},
+          "expr": "sum by (job) (rate({job=\"nginx\"}[5m]))"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Log lines per 5s (fastapi)",
+      "gridPos": {"x": 12, "y": 0, "w": 12, "h": 8},
+      "targets": [
+        {
+          "datasource": {"type": "loki", "uid": "loki"},
+          "expr": "sum by (job) (rate({job=\"fastapi\"}[5m]))"
+        }
+      ]
+    },
+    {
+      "type": "table",
+      "title": "Recent Errors (nginx + fastapi)",
+      "gridPos": {"x": 0, "y": 8, "w": 24, "h": 10},
+      "options": {"showHeader": true},
+      "targets": [
+        {
+          "datasource": {"type": "loki", "uid": "loki"},
+          "expr": "{job=~\"nginx|fastapi\", type=\"error\"} |= \"\" | line_format '{{.job}} {{.type}} {{.filename}} {{.message}}'",
+          "refId": "A"
+        }
+      ]
+    }
+  ],
+  "templating": {"list": []},
+  "time": {"from": "now-1h", "to": "now"}
+}
