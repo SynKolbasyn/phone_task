@@ -45,6 +45,53 @@ services:
       - "$FASTAPI_PORT"
     volumes:
       - ./logs/fastapi/:/var/log/fastapi/
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://$POSTGRES_USER:$POSTGRES_PASSWORD@$POSTGRES_HOST:$POSTGRES_PORT/$POSTGRES_DB
+      - REDIS_URL=redis://:$REDIS_PASSWORD@$REDIS_HOST:$REDIS_PORT/0
+      - MINIO_ENDPOINT=$MINIO_HOST:$MINIO_PORT
+      - MINIO_ACCESS_KEY=$MINIO_ROOT_USER
+      - MINIO_SECRET_KEY=$MINIO_ROOT_PASSWORD
+      - PYTHONPATH=./src/
+    env_file:
+      - "./.env"
+    depends_on:
+      - "redis"
+      - "minio"
+      - "postgres"
+    restart: "unless-stopped"
+
+  celery-worker:
+    build:
+      context: "./"
+      dockerfile: "./Dockerfile"
+    command: ["sh","-c","uv run celery -A src.worker.celery_app.app worker --loglevel=INFO"]
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://$POSTGRES_USER:$POSTGRES_PASSWORD@$POSTGRES_HOST:$POSTGRES_PORT/$POSTGRES_DB
+      - REDIS_URL=redis://:$REDIS_PASSWORD@$REDIS_HOST:$REDIS_PORT/0
+      - MINIO_ENDPOINT=$MINIO_HOST:$MINIO_PORT
+      - MINIO_ACCESS_KEY=$MINIO_ROOT_USER
+      - MINIO_SECRET_KEY=$MINIO_ROOT_PASSWORD
+      - PYTHONPATH=./src/
+    env_file:
+      - "./.env"
+    depends_on:
+      - "redis"
+      - "minio"
+      - "postgres"
+    restart: "unless-stopped"
+
+  celery-beat:
+    build:
+      context: "./"
+      dockerfile: "./Dockerfile"
+    command: ["sh","-c","uv run celery -A src.worker.celery_app.app beat --loglevel=INFO"]
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://$POSTGRES_USER:$POSTGRES_PASSWORD@$POSTGRES_HOST:$POSTGRES_PORT/$POSTGRES_DB
+      - REDIS_URL=redis://:$REDIS_PASSWORD@$REDIS_HOST:$REDIS_PORT/0
+      - MINIO_ENDPOINT=$MINIO_HOST:$MINIO_PORT
+      - MINIO_ACCESS_KEY=$MINIO_ROOT_USER
+      - MINIO_SECRET_KEY=$MINIO_ROOT_PASSWORD
+      - PYTHONPATH=./src/
     env_file:
       - "./.env"
     depends_on:
