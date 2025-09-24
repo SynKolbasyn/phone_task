@@ -58,7 +58,10 @@ app = FastAPI(
 async def get_session() -> AsyncSession:
     """Dependency to get database session."""
     async with async_session() as session:
-        yield session
+        try:
+            yield session
+        finally:
+            await session.close()
 
 
 SessionDep = Annotated[AsyncSession, Depends(get_session)]
@@ -131,11 +134,11 @@ async def get_recent_calls(
     return result.scalars().all()
 
 
-@app.get("/calls/{call_id}", response_model=CallWithRecordResponse)
+@app.get("/calls/{call_id}")
 async def get_call(
     call_id: UUID,
     session: SessionDep,
-) -> Call:
+) -> dict:
     """Get a specific phone call with its record."""
     query = select(Call).options(selectinload(Call.record)).where(Call.id == call_id)
     result = await session.execute(query)
@@ -144,7 +147,29 @@ async def get_call(
     if not call:
         raise HTTPException(status_code=404, detail="Call not found")
 
-    return call
+    # Convert to dict format for response
+    call_dict = {
+        "id": call.id,
+        "caller": call.caller,
+        "receiver": call.receiver,
+        "started_at": call.started_at,
+        "status": call.status.value if hasattr(call.status, 'value') else call.status,
+        "created_at": call.created_at,
+        "updated_at": call.updated_at,
+        "record": None
+    }
+
+    if call.record:
+        call_dict["record"] = {
+            "id": call.record.id,
+            "filename": call.record.filename,
+            "duration": call.record.duration,
+            "transcription": call.record.transcription,
+            "created_at": call.record.created_at,
+            "updated_at": call.record.updated_at,
+        }
+
+    return call_dict
 
 
 @app.put("/calls/{call_id}/status")
@@ -208,13 +233,19 @@ async def upload_record(
     await session.commit()
     await session.refresh(record)
 
-    # Start background processing task
-    process_record_task.delay(str(record.id))
+    # Start background processing task (if Celery is available)
+    try:
+        process_record_task.delay(str(record.id))
+        task_status = "processing"
+    except Exception as e:
+        # If Celery/Redis is not available, just log and continue
+        print(f"Warning: Could not start background task: {e}")
+        task_status = "queued (no worker available)"
 
     return {
         "message": "Record uploaded successfully",
         "record_id": record.id,
-        "status": "processing",
+        "status": task_status,
     }
 
 

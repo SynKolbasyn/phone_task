@@ -10,14 +10,14 @@ class Base(DeclarativeBase):
         nullable=False,
         unique=True,
         autoincrement=False,
-        default_factory=uuid4,
+        default=uuid4,
     )
     created_at: Mapped[datetime] = mapped_column(
         nullable=False,
-        default_factory=lambda: datetime.now(UTC),
+        default=lambda: datetime.now(UTC),
     )
     updated_at: Mapped[datetime] = mapped_column(
         nullable=False,
-        default_factory=lambda: datetime.now(UTC),
+        default=lambda: datetime.now(UTC),
         onupdate=lambda: datetime.now(UTC),
     )

@@ -8,13 +8,23 @@ from pydantic_settings import BaseSettings
 class Settings(BaseSettings):
     base_dir: Path = Path(__file__).resolve().parent.parent
 
-    database_url: str = environ["DATABASE_URL"]
-    redis_url: str = environ["REDIS_URL"]
+    # Database configuration - use SQLite for testing
+    database_url: str = environ.get(
+        "DATABASE_URL", 
+        f"sqlite+aiosqlite:///{Path(__file__).resolve().parent.parent}/phone_task.db"
+    )
+    
+    # Redis configuration
+    redis_url: str = environ.get(
+        "REDIS_URL",
+        "redis://localhost:6379/0"
+    )
 
-    minio_endpoint: str = environ["MINIO_ENDPOINT"]
-    minio_access_key: str = environ["MINIO_ACCESS_KEY"]
-    minio_secret_key: str = environ["MINIO_SECRET_KEY"]
-    minio_bucket_name: str = environ["MINIO_BUCKET_NAME"]
+    # MinIO configuration
+    minio_endpoint: str = environ.get("MINIO_ENDPOINT", "localhost:9000")
+    minio_access_key: str = environ.get("MINIO_ACCESS_KEY", "user")
+    minio_secret_key: str = environ.get("MINIO_SECRET_KEY", "password")
+    minio_bucket_name: str = environ.get("MINIO_BUCKET_NAME", "phone-records")
 
     logger: Logger = getLogger("fastapi")
 

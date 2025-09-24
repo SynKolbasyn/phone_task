@@ -1,21 +1,21 @@
 from __future__ import annotations
 
+from datetime import datetime
+from enum import Enum
 from typing import TYPE_CHECKING
 
-from sqlalchemy import Enum
+from sqlalchemy import Enum as SQLEnum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from models.base import Base
 
 if TYPE_CHECKING:
-    from datetime import datetime
-
     from models.record import Record
 
 
 class CallStatus(Enum):
     CREATED = "created"
-    PROCESSING = "processing"
+    PROCESSING = "processing" 
     READY = "ready"
 
 
@@ -25,10 +25,11 @@ class Call(Base):
     caller: Mapped[str] = mapped_column(nullable=False, index=True)
     receiver: Mapped[str] = mapped_column(nullable=False, index=True)
     started_at: Mapped[datetime] = mapped_column(nullable=False)
-    status: Mapped[CallStatus] = mapped_column(
+    status: Mapped[str] = mapped_column(
+        SQLEnum(CallStatus),
         default=CallStatus.CREATED,
         nullable=False,
         index=True,
     )
 
-    record: Mapped[Record] = relationship(back_populates="call")
+    record: Mapped[Record] = relationship(back_populates="call", uselist=False)

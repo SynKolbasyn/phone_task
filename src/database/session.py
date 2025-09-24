@@ -7,6 +7,6 @@ from database.engine import session_maker
 
 
 @asynccontextmanager
-async def async_session() -> AsyncGenerator[AsyncSession]:
-    async with session_maker.begin() as session:
+async def async_session() -> AsyncGenerator[AsyncSession, None]:
+    async with session_maker() as session:
         yield session
