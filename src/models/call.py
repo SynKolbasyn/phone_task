@@ -1,10 +1,16 @@
-from datetime import datetime
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
 
 from sqlalchemy import Enum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from models.base import Base
-from models.record import Record
+
+if TYPE_CHECKING:
+    from datetime import datetime
+
+    from models.record import Record
 
 
 class CallStatus(Enum):

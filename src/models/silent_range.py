@@ -1,10 +1,16 @@
-from uuid import UUID
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
 
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from models.base import Base
-from models.record import Record
+
+if TYPE_CHECKING:
+    from uuid import UUID
+
+    from models.record import Record
 
 
 class SilentRange(Base):
