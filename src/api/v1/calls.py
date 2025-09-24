@@ -7,8 +7,8 @@ from fastapi import APIRouter, Depends, HTTPException, UploadFile, status
 from minio import Minio
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from database.session import async_session
 from config import Settings
+from database.session import async_session
 from models.call import Call, Record
 from schemas.call import CallCreate, CallFullResponse
 from worker.tasks import process_record_task
