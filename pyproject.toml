@@ -11,6 +11,7 @@ requires-python = ">=3.13, <3.14"
 dependencies = [
     "alembic==1.16.5",
     "asyncpg==0.30.0",
+    "audioop-lts==0.2.2",
     "celery[redis]==5.5.3",
     "fastapi[standard]==0.117.1",
     "minio==7.2.16",

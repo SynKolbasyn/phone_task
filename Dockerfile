@@ -5,6 +5,8 @@ ENV UV_COMPILE_BYTECODE=1
 
 WORKDIR /fastapi/
 
+RUN apk add --no-cache ffmpeg
+
 COPY ./.python-version ./
 RUN uv python install
 
