@@ -4,7 +4,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from api.v1.api import api_router
 from core.logging import setup_logging
 
-# Настраиваем логирование до создания приложения
 setup_logging()
 
 app = FastAPI(

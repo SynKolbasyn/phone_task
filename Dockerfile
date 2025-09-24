@@ -13,6 +13,7 @@ RUN uv python install
 COPY ./pyproject.toml ./
 RUN uv sync --upgrade
 
+COPY ./alembic.ini ./
 COPY ./src/ ./src/
 
-CMD ["sh", "-c", "uv run fastapi run --app app --host 0.0.0.0 --port $FASTAPI_PORT --workers $(nproc) src/main.py"]
+CMD ["sh", "-c", "uv run alembic upgrade head && uv run fastapi run --app app --host 0.0.0.0 --port $FASTAPI_PORT --workers $(nproc) src/main.py"]
