@@ -5,7 +5,7 @@ from core.logging import setup_logging
 
 setup_logging()
 
-app = Celery(backend=Settings().redis_url, broker=Settings().redis_url, include="tasks")
+app = Celery(backend=Settings().redis_url, broker=Settings().redis_url, include="worker.tasks")
 
 app.conf.update(
     task_serializer="json",

@@ -11,4 +11,4 @@ FROM minio/minio:latest
 COPY --from=certs /certs/ /certs/
 
 
-CMD [ "minio", "-S", "/certs/", "server", "/data/data_{1...8}/" ]
+CMD [ "minio", "-S", "/certs/", "server", "/data/" ]
