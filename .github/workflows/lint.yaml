@@ -1,0 +1,23 @@
+name: Lint
+
+on: [push, pull_request]
+
+jobs:
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - run: |
+          uv run --dev ruff --version
+          uv run --dev ruff format --check --diff
+
+  check:
+    needs: format
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+      - run: |
+          uv run --dev ruff --version
+          uv run --dev ruff check || uv run --dev ruff check --statistics

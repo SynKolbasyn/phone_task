@@ -19,14 +19,14 @@ class Call(Base):
 
     caller: Mapped[str] = mapped_column(nullable=False, index=True)
     receiver: Mapped[str] = mapped_column(nullable=False, index=True)
-    started_at: Mapped[datetime] = mapped_column(nullable=False)
-    status: Mapped[CallStatus] = mapped_column(
-        default=CallStatus.CREATED,
-        nullable=False,
-        index=True,
-    )
+    started_at: Mapped[datetime]
+    status: Mapped[CallStatus] = mapped_column(default=CallStatus.CREATED)
 
-    record: Mapped["Record"] = relationship(back_populates="call")
+    record: Mapped["Record"] = relationship(
+        back_populates="call",
+        single_parent=True,
+        lazy="joined",
+    )
 
 
 class SilentRange(Base):
@@ -35,20 +35,35 @@ class SilentRange(Base):
     record_id: Mapped[UUID] = mapped_column(
         ForeignKey("records.id", ondelete="CASCADE"),
     )
-    start: Mapped[float] = mapped_column(nullable=False)
-    end: Mapped[float] = mapped_column(nullable=False)
+    start: Mapped[float]
+    end: Mapped[float]
 
-    record: Mapped["Record"] = relationship(back_populates="silent_ranges")
+    record: Mapped["Record"] = relationship(
+        back_populates="silent_ranges",
+        lazy="joined",
+    )
 
 
 class Record(Base):
     __tablename__ = "records"
 
-    call_id: Mapped[UUID] = mapped_column(ForeignKey("calls.id", ondelete="CASCADE"))
-    filename: Mapped[str] = mapped_column(nullable=False)
-    object_path: Mapped[str] = mapped_column(nullable=False)
-    duration: Mapped[float] = mapped_column(nullable=False)
-    transcription: Mapped[str] = mapped_column(nullable=False)
+    call_id: Mapped[UUID] = mapped_column(
+        ForeignKey("calls.id", ondelete="CASCADE"),
+        unique=True,
+    )
+    filename: Mapped[str]
+    object_path: Mapped[str]
+    duration: Mapped[float]
+    transcription: Mapped[str]
+    presigned_url: Mapped[str]
+    expires_at: Mapped[datetime]
 
-    call: Mapped[Call] = relationship(back_populates="record")
-    silent_ranges: Mapped[list[SilentRange]] = relationship(back_populates="record")
+    call: Mapped[Call] = relationship(
+        back_populates="record",
+        single_parent=True,
+        lazy="joined",
+    )
+    silent_ranges: Mapped[list[SilentRange]] = relationship(
+        back_populates="record",
+        lazy="joined",
+    )

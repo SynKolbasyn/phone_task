@@ -17,7 +17,3 @@ class Settings(BaseSettings):
     minio_bucket_name: str = environ["MINIO_BUCKET_NAME"]
 
     logger: Logger = getLogger("fastapi")
-
-    class Config:
-        env_file = ".env"
-        env_file_encoding = "utf-8"

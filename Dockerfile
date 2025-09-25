@@ -16,4 +16,6 @@ RUN uv sync --upgrade
 COPY ./alembic.ini ./
 COPY ./src/ ./src/
 
+ENV PYTHONPATH=./src/
+
 CMD ["sh", "-c", "uv run alembic upgrade head && uv run fastapi run --app app --host 0.0.0.0 --port $FASTAPI_PORT --workers $(nproc) src/main.py"]
