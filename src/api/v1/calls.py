@@ -47,7 +47,7 @@ from worker.tasks import process_record_task
 router = APIRouter(prefix="/calls", tags=["calls"])
 
 
-@router.post("/calls/", status_code=status.HTTP_201_CREATED)
+@router.post("/", status_code=status.HTTP_201_CREATED)
 async def create_call(
     call_data: CallCreate,
     session: Annotated[AsyncSession, Depends(provide_async_session)],
@@ -87,7 +87,7 @@ def save_to_minio(file: bytes, file_name: str) -> None:
         ) from e
 
 
-@router.post("/calls/{call_id}/recording/", status_code=status.HTTP_201_CREATED)
+@router.post("/{call_id}/recording/", status_code=status.HTTP_201_CREATED)
 async def upload_recording(
     call_id: UUID,
     file: UploadFile,
@@ -179,4 +179,4 @@ async def get_call(
             detail="Call not found",
         )
 
-    return get_call_with_record(call)
+    return await to_thread(get_call_with_record, call)
