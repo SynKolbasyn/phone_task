@@ -1,4 +1,4 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Response
 from fastapi.middleware.cors import CORSMiddleware
 
 from api.v1.api import api_router
@@ -26,6 +26,5 @@ app.include_router(api_router)
 
 
 @app.get("/health")
-async def health_check() -> dict[str, str]:
-    """Эндпоинт для проверки здоровья сервиса."""
-    return {"status": "ok"}
+async def health_check() -> Response:
+    return Response()

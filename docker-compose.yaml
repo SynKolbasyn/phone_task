@@ -28,8 +28,8 @@ services:
     build:
       context: "./minio/"
       dockerfile: "./Dockerfile"
-    expose:
-      - "$MINIO_PORT"
+    ports:
+      - "$MINIO_PORT:$MINIO_PORT"
     volumes:
       - "minio:/data/"
     env_file:
