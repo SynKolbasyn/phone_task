@@ -7,3 +7,6 @@ logs/
 
 .env
 *.lock
+
+context.sh
+context.txt
