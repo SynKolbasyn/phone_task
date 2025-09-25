@@ -17,7 +17,6 @@ You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 """
 
-
 from sqlalchemy.ext.asyncio import async_sessionmaker, create_async_engine
 
 from config import Settings
